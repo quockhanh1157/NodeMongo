@@ -1,0 +1,9 @@
+--------------------------------------------------------------------------------
+[ERROR] - 2025-03-25T04:11:19.810Z
+URL: PUT /api/task
+Message: Invalid columnId format
+StackTrace: 
+Error: Invalid columnId format
+    at /Users/khanh/Documents/my_project/NodeMongo/src/controllers/task.ts:67:19
+    at Generator.next (<anonymous>)
+--------------------------------------------------------------------------------
