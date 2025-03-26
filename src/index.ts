@@ -6,6 +6,8 @@ dotenv.config()
 import logMiddleware from "./middlewares/log.middleware";
 import errorMiddleware from "./middlewares/error.middleware";
 
+import userRouter from "./routes/user";
+
 const app = express()
 const port = process.env.PORT || 3000
 
@@ -15,6 +17,7 @@ app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 
 app.use(logMiddleware)
+app.use("/api/auth", userRouter)
 
 app.use(errorMiddleware)
 
