@@ -3,8 +3,8 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const saltRounds = process.env.BCRYPT_SALT_ROUND || 10;
-
+const saltRounds = Number(process.env.BCRYPT_SALT_ROUND || 10);
+const salt = bcrypt.genSaltSync(saltRounds);
 /**
  * Mã hóa mật khẩu
  * @param password - Mật khẩu gốc
@@ -13,8 +13,9 @@ const saltRounds = process.env.BCRYPT_SALT_ROUND || 10;
 
 const hashPassword = async (password: string) => {
     try {
-        return await bcrypt.hash(password, saltRounds);
+        return await bcrypt.hash(password, salt);
     } catch (error) {
+        console.log(error);
         throw new Error("Lỗi khi mã hóa mật khẩu");
     }
 }
