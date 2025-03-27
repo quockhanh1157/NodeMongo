@@ -12,7 +12,8 @@ const errorMiddleware = (err: HttpError, req: Request, res: Response, next: Next
     console.error("\x1b[31m%s\x1b[0m", `[ERROR] ${timestamp} - ${err.message}\n${stackTrace}`);
 
     // Ghi log vào file
-    const log = `\n${separator}
+    if (statusCode >= 500) {
+        const log = `\n${separator}
 [ERROR] - ${timestamp}
 URL: ${req.method} ${req.originalUrl}
 Message: ${err.message}
@@ -20,8 +21,8 @@ StackTrace:
 ${stackTrace}
 ${separator}\n`;
 
-    fs.appendFileSync("logsError.txt", log);
-
+        fs.appendFileSync("logsError.txt", log);
+    }
     // Trả về lỗi
     res.status(statusCode).json({
         message: "Có lỗi xảy ra!",
