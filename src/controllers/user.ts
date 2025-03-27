@@ -6,6 +6,7 @@ import {HttpError} from "../utils/HttpError";
 import {JwtPayload} from "jsonwebtoken";
 import dotenv from "dotenv";
 import CustomRequest from "../types/express";
+
 dotenv.config();
 
 const registerUser = async (req: Request, res: Response, next: NextFunction) => {
@@ -86,17 +87,54 @@ const getUser = async (req: CustomRequest, res: Response, next: NextFunction) =>
     }
 }
 
-const updateUser = async (req: Request, res: Response, next: NextFunction) => {
+const updateUser = async (req: CustomRequest, res: Response, next: NextFunction) => {
     try {
+        const {username, email}: UserType = req.body;
+        const updateData: Partial<UserType> = {}
 
+        if (!username && !email) throw new HttpError("Missing required information!", 400);
+
+        if (username?.trim()) updateData.username = username;
+        if (email?.trim()) updateData.email = email;
+
+        // Nếu không có dữ liệu nào hợp lệ để update, báo lỗi 400
+        if (Object.keys(updateData).length === 0) {
+            throw new HttpError("Missing required information!", 400);
+        }
+
+        const user = req.user
+        const updatedUser = await User.findByIdAndUpdate(user!.id, updateData, {new: true}).select("-password -refreshToken");
+
+        res.status(200).json(updatedUser)
     } catch (error) {
         next(error);
     }
 }
 
-const changePassword = async (req: Request, res: Response, next: NextFunction) => {
+const changePassword = async (req: CustomRequest, res: Response, next: NextFunction) => {
     try {
+        const {newPassword, password} = req.body;
 
+        if (!newPassword || !password) {
+            throw new HttpError("Missing required fields", 400);
+        }
+
+        const user = req.user
+        const userData = await User.findById({_id: user!.id}).select("password");
+
+        if (!userData) {
+            throw new HttpError("User not found", 404);
+        }
+
+        const isMatch = await comparePassword(password, userData.password);
+        if (!isMatch) {
+            throw new HttpError("Invalid password", 401);
+        }
+
+        userData.password = await hashPassword(newPassword);
+        await userData.save()
+
+        res.status(200)
     } catch (error) {
         next(error);
     }
